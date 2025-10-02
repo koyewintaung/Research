@@ -31,7 +31,7 @@ def train_and_save_model(data_path="data/sample_data.csv", model_path="models/mo
     pipeline.fit(X_train, y_train)
 
     # 6. Save model
-    joblib.dump(pipeline, model_path)
+    joblib.dump(model, "model.joblib", compress=3, protocol=4)
 
     print(f"✅ Model trained and saved to {model_path}")
 

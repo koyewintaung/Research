@@ -7,7 +7,8 @@ st.title("❤️ Cardiovascular Disease Predictor")
 # Load trained model
 @st.cache_resource
 def load_model():
-    return joblib.load("model.joblib")
+    from src.train_model import train_and_save_model
+    return train_and_save_model()
 
 model = load_model()
 

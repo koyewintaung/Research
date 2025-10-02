@@ -1,4 +1,3 @@
-# src/train_model.py
 import pandas as pd
 import joblib
 from sklearn.model_selection import train_test_split
@@ -14,8 +13,7 @@ def train_and_save_model(data_path="data/sample_data.csv", model_path="models/mo
     df = pd.read_csv(data_path)
 
     # 2. Define features (X) and target (y)
-    # ⚠️ Make sure the 'target' column exists in your dataset
-    X = df.drop(columns=["patientid", "target"], errors="ignore")  
+    X = df.drop(columns=["patientid", "target"], errors="ignore")
     y = df["target"]
 
     # 3. Train-test split
@@ -31,9 +29,10 @@ def train_and_save_model(data_path="data/sample_data.csv", model_path="models/mo
     pipeline.fit(X_train, y_train)
 
     # 6. Save model
-    joblib.dump(model, "model.joblib", compress=3, protocol=4)
+    joblib.dump(pipeline, model_path, compress=3)
 
     print(f"✅ Model trained and saved to {model_path}")
+    return pipeline   # return so Streamlit can use it directly
 
 if __name__ == "__main__":
     train_and_save_model()

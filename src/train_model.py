@@ -1,50 +1,39 @@
+# src/train_model.py
 import pandas as pd
 import joblib
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 
-# Load data
-df = pd.read_csv("data/sample_data.csv")
+def train_and_save_model(data_path="data/sample_data.csv", model_path="models/model.joblib"):
+    """
+    Train a logistic regression model on the CVD dataset and save it as model.joblib
+    """
+    # 1. Load dataset
+    df = pd.read_csv(data_path)
 
-X = df.drop(columns=["patientid","target"])
-y = df["target"]
+    # 2. Define features (X) and target (y)
+    # ⚠️ Make sure the 'target' column exists in your dataset
+    X = df.drop(columns=["patientid", "target"], errors="ignore")  
+    y = df["target"]
 
-# Select columns
-num_cols = ["age","resting_blood_pressure","serum_cholesterol",
-            "maximum_heart_rate_achieved","oldpeakst"]
-cat_cols = ["gender","chestpain","fasting_blood_sugar",
-            "resting_electrocardiogram_results","exercise_induced_angina",
-            "slope_of_the_peak_exercise_st_segment"]
+    # 3. Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Preprocessing
-num_transform = Pipeline([
-    ("imputer", SimpleImputer(strategy="median")),
-    ("scaler", StandardScaler())
-])
-cat_transform = Pipeline([
-    ("imputer", SimpleImputer(strategy="most_frequent")),
-    ("onehot", OneHotEncoder(handle_unknown="ignore"))
-])
-preprocessor = ColumnTransformer([
-    ("num", num_transform, num_cols),
-    ("cat", cat_transform, cat_cols)
-])
+    # 4. Build a pipeline (scaling + logistic regression)
+    pipeline = Pipeline([
+        ("scaler", StandardScaler()),
+        ("model", LogisticRegression(max_iter=1000))
+    ])
 
-# Model
-pipe = Pipeline([
-    ("preproc", preprocessor),
-    ("clf", LogisticRegression(max_iter=1000))
-])
+    # 5. Train model
+    pipeline.fit(X_train, y_train)
 
-# Train/test split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, stratify=y, random_state=42)
+    # 6. Save model
+    joblib.dump(pipeline, model_path)
 
-pipe.fit(X_train, y_train)
+    print(f"✅ Model trained and saved to {model_path}")
 
-print("Training complete. Saving model...")
-joblib.dump(pipe, "model.joblib")
+if __name__ == "__main__":
+    train_and_save_model()
